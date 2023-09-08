@@ -1,4 +1,4 @@
-# Puppet for setup
+# Puppet for setingup
 
 $nginx_conf = "server {
     listen 80 default_server;
@@ -11,7 +11,7 @@ $nginx_conf = "server {
         index index.html index.htm;
     }
     location /redirect_me {
-        return 301 www.youtube.com\\/watch?v=QH2-TGUlwu4
+        return 301 www.github.com\/odjels
 }
     error_page 404 /404.html;
     location /404 {
