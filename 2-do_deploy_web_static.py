@@ -1,38 +1,33 @@
-#!/usr/bin/python3
-"""This Fabric script distributes an archive to my web servers"""
 from fabric.api import *
-from datetime import datetime
-from os import path
+import os.path
 
-env.hosts = ['3.85.175.4', '100.26.175.217']
-env.user = 'ubuntu'
-env.key_filename = '/root/.ssh/id_rsa'
+
+env.hosts = ['<IP web-01>', '<IP web-02>']
+env.user = '<your_username>'
+env.key_filename = '/path/to/your/private_key'
+
 
 def do_deploy(archive_path):
-    """Distributing an archive to the web servers."""
-    if path.exists(archive_path):
-        put(archive_path, '/tmp/')
-        # get the file name by spliting the archive_path using '/' delimiter
-        fil_name = archive_path.split("/")[-1]
-        # After getting the file name, split it again to remove the extension
-        n_e_file = fil_name.split(".")[0]
-        path_way = "/data/web_static/releases/"
-        # Creainge the folder with the file name to keep uncompressed files
-        run('mkdir -p {0}{1}/'.forma(path_way, n_e_file))
-        # Decompressing the archived files
-        run('tar -xzf /tmp/{0} -C {1}{2}/'.format
-            (fil_name, path_way, n_e_file)
-            )
-        # Deleinge the archive from the web server
-        run('rm /tmp/{0}'.format(fil_name))
-        run('mv {0}{1}/web_static/* {0}{1}/'.format
-            (path_way, n_e_file)
-            )
-        run('rm -rf {0}{1}/web_static'.format(path_way, n_e_file))
-        run('rm -rf /data/web_static/current')
-        run('ln -s {0}{1}/ /data/web_static/current'.format
-            (path_way, n_e_file)
-            )
-        return True
-    else:
-        return False
+        if not os.path.exists(archive_path):
+                    return False
+                    
+                    # Upload the archive to /tmp/ directory on the web servers
+                        put(archive_path, '/tmp/')
+                            
+                                # Extract the archive to /data/web_static/releases/<archive filename without extension> on the web servers
+                                    archive_filename = os.path.basename(archive_path)
+                                        release_path = '/data/web_static/releases/{}'.format(os.path.splitext(archive_filename)[0])
+                                            run('mkdir -p {}'.format(release_path))
+                                                run('tar -xzf /tmp/{} -C {}'.format(archive_filename, release_path))
+                                                    
+                                                        # Delete the archive from the web servers
+                                                            run('rm /tmp/{}'.format(archive_filename))
+                                                                
+                                                                    # Delete the symbolic link /data/web_static/current from the web servers
+                                                                        run('rm /data/web_static/current')
+                                                                            
+                                                                                # Create a new symbolic link /data/web_static/current on the web servers
+                                                                                    run('ln -s {} /data/web_static/current'.format(release_path))
+                                                                                        
+                                                                                            return True
+
